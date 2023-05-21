@@ -1,7 +1,6 @@
 from typing import Union
 
 import numpy as np
-import scipy
 from numpy.linalg import LinAlgError
 
 import func
@@ -59,7 +58,8 @@ class LineSearch:
     def update(self):
         self.iterations += 1
         # optional printing for seeing the process
-        if (self.iterations < 100_000 and self.iterations % 10_000 == 0) or self.iterations % 100_000 == 0:
+        if self.iterations % 10**(np.floor(np.log10(self.iterations))) == 0:
+            # if (self.iterations < 100_000 and self.iterations % 10_000 == 0) or self.iterations % 100_000 == 0:
             print(f"{self.iterations} iterations, residual's norm = {self.residual_norm()}")
 
     def execute(self):
@@ -76,11 +76,7 @@ class LineSearch:
             self.print_solution()
 
     def residual_norm(self):
-        # either specified norm for multivariate case (default spectral norm) or in univariate L_1 norm (abs(gradient))
-        if self.f.get_dim() > 1:
-            return scipy.linalg.norm(self.grad_f_k, ord=self.norm)
-        else:
-            return abs(self.grad_f_k)
+        return np.linalg.norm(self.grad_f_k, ord=self.norm)
 
 
 class NewtonFamilyMethod(LineSearch):
@@ -186,16 +182,10 @@ class ConjugateGradient(LineSearch):
 
         if name not in ['Linear', 'P-R', 'F-R']:
             raise ValueError("Possible names for NewtonFamilyMethod are: 'Linear', 'P-R', 'F-R'")
-        super(ConjugateGradient, self).__init__(f, 'CG_' + name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+        super().__init__(f, 'CG_' + name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
         self.r_k = np.dot(self.f.A, self.x_k) - self.f.b
         self.p_k = -self.r_k
         self.r_k_norm = None
-
-    def execute(self):
-        super(ConjugateGradient, self).execute()
-
-    def print_solution(self, cut_off: bool = False):
-        super(ConjugateGradient, self).print_solution(cut_off)
 
     def compute_alpha_k(self) -> float:
         raise NotImplementedError("We don't use compute alpha for cg so far")
@@ -211,9 +201,9 @@ class ConjugateGradient(LineSearch):
 
         self.x_k = self.x_k + self.alpha_k * self.p_k
         self.p_k = -self.r_k + beta_k_next * self.p_k
-        super(ConjugateGradient, self).update()
+        super().update()
 
-    def residual_norm(self):
+    def residual_norm(self) -> float:
         return np.linalg.norm(self.r_k, ord=2)
 
 

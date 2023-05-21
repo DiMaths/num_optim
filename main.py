@@ -15,7 +15,7 @@ if __name__ == '__main__':
     cg_linear = alg.ConjugateGradient(ax_b)
     cg_linear.execute()
 
-    for n in [2]:
+    for n in [5]:
         print('*' * 25)
         print(f"HILBERT MATRIX {n} x {n}")
         print('*' * 25)
@@ -39,8 +39,8 @@ if __name__ == '__main__':
     print("f(x) = 0.25x^4  +(2/3)x^3 -0.5x^2 -2x -7")
     print("f'(x) = (x+1)(x-1)(x+2) --> minimizers are x= -2 and 1")
     poly1 = func.UnivariatePolynomial(degree=4, coeffs=np.array([0.25, float(2 / 3), -0.5, -2., -7]))
-    sd1 = alg.NewtonFamilyMethod(poly1, start_point=0, name='SD')
+    sd1 = alg.NewtonFamilyMethod(poly1, start_point=np.array([0.]), name='SD')
     sd1.execute()
-    nm1 = alg.NewtonFamilyMethod(poly1, start_point=0, name='NM')
+    nm1 = alg.NewtonFamilyMethod(poly1, start_point=np.array([0.]), name='NM')
     nm1.execute()
 
