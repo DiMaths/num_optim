@@ -1,23 +1,47 @@
+from abc import abstractmethod, ABC
+
 import numpy as np
 
 
-class Function:
-    def __init__(self, dim: int = None):
+class Function(ABC):
+    def __init__(self, dim: int):
+        """
+        Base class for generalized function definitions
+        :param dim: dimensions of function
+        """
         self.dim = dim
 
+    @abstractmethod
     def evaluate(self, x: np.ndarray):
-        # evaluation at point, differs for each subclass
+        """
+        evaluation at point, differs for each subclass
+        :param x: n-dimensional point x
+        """
         raise NotImplementedError
 
+    @abstractmethod
     def grad(self, x: np.ndarray):
-        # explicit gradient, differs for each subclass
+        """
+        explicit gradient, differs for each subclass
+        :param x: n-dimensional point x
+        """
         raise NotImplementedError
 
+    @abstractmethod
     def hessian(self, x: np.ndarray):
-        # explicit hessian, differs for each subclass
+        """
+        explicit hessian, differs for each subclass
+        :param x: n-dimensional point x
+        """
         raise NotImplementedError
 
     def num_grad(self, x: np.ndarray, eps: float = 10**-6):
+        """
+        calculate numerical gradient aprox. at point
+        :param x: n-dimensional point x
+        :param eps: accuracy of approx.
+        :return: n-dimensional gradient
+        """
         grad = []
         if self.get_dim() == 1:
             grad = 0.5 * (self.evaluate(x+eps) - self.evaluate(x-eps)) / eps
@@ -30,6 +54,12 @@ class Function:
         return np.array(grad)
 
     def num_hessian(self, x: np.ndarray, eps: float = 10**-8):
+        """
+        calculate numerical hessian approx. at point
+        :param x: n-dimensional point x
+        :param eps: accuracy of approx.
+        :return: nxn dimensional hessian-matrix
+        """
         hess = []
         if self.get_dim() == 1:
             hess = 0.5 * (self.num_grad(x+eps) - self.num_grad(x-eps)) / eps
@@ -47,7 +77,10 @@ class Function:
 
 class Quadratic(Function):
     def __init__(self, A: np.ndarray, b: np.ndarray):
-        # A is positive definite square matrix, b is column vector
+        """
+        :param A: A is positive definite square matrix
+        :param b:  b is column vector
+        """
         super().__init__(dim=len(b.T))
         self.A = A
         self.b = b
@@ -78,6 +111,11 @@ class Sin(Function):
 
 class UnivariatePolynomial(Function):
     def __init__(self, degree: int, coeffs: np.ndarray = None):
+        """
+        Generate univar. Poly
+        :param degree: degree of poly
+        :param coeffs: coefficients of polynomial, if None Random [-5,5]
+        """
         super().__init__(dim=1)
         self.degree = degree
         if coeffs is not None:
@@ -103,12 +141,16 @@ class UnivariatePolynomial(Function):
 
 
 def create_vandermonde_vector(x: float, degree: int) -> np.ndarray:
-    # creates x^degree, x^(degree-1), .... x^2, x, 1
-    return np.array([float(x) ** i for i in range(degree+1)][::-1])
-
+    # creates [x^degree, x^(degree-1), .... x^2, x, 1]
+    return np.vander([x], degree+1)
 
 class MultivariateLinear(Function):
     def __init__(self, A: np.ndarray, b: np.ndarray):
+        """
+        Multivariate linear function
+        :param A: n-dimensional k-values
+        :param b:  n-dimensional d-values
+        """
         super().__init__(dim=len(b.T))
         self.A = A
         self.b = b
