@@ -4,9 +4,10 @@ import numpy as np
 from numpy.linalg import LinAlgError
 
 import func
+from abc import abstractmethod, ABC
 
 
-class LineSearch:
+class LineSearch(ABC):
     def __init__(self, f: func.Function,
                  name: str,
                  start_point: np.ndarray = None,
@@ -55,6 +56,7 @@ class LineSearch:
         print(f"Final residual norm is {self.residual_norm()}")
         print('-' * 50)
 
+    @abstractmethod
     def update(self):
         self.iterations += 1
         # optional printing for seeing the process
