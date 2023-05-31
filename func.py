@@ -169,7 +169,7 @@ class RosenBrock(Function):
         return 100 * ((x[1] - x[0] ** 2) ** 2) + (1 - x[0]) ** 2
 
     def grad(self, x: np.ndarray) -> np.ndarray:
-        return np.array([-400 * x[0] * (-x[0] * 2 + x[1]) - 2 * (-x[0] + 1),
+        return np.array([400 * x[0] * (x[0] ** 2 - x[1]) - 2 * (-x[0] + 1),
                          200 * (-x[0] ** 2 + x[1])])
 
     def hessian(self, x: np.ndarray) -> np.ndarray:
