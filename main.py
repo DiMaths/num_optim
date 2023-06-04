@@ -4,43 +4,54 @@ import func
 import optim_algos as alg
 
 if __name__ == '__main__':
+    # Nonlinear CG both F-R and P-R
+    fs = [func.RosenBrock(2), func.SecondObjective(2)]
+    fs_names = ["Rosenblock", "Alternative"]
+    points = [[np.array([1.2, 1.2]), np.array([-1.2, 1.]), np.array([0.2, 0.8])],
+              [np.array([-0.2, 1.2]), np.array([3.8, 0.1]), np.array([1.9, 0.6])]]
+    names = ["CG_FR", "CG_PR"]
+    for i, f in enumerate(fs):
+        print()
+        print('|' * 50)
+        print(f'Experiments on "{fs_names[i]}" function')
+        print('|' * 50)
+        for point in points[i]:
+            print(f'***** STARTING POINT = {point} *****')
+            for name in names:
+                test_alg = alg.NonlinearConjugateGradient(f, name, point.copy())
+                test_alg.execute()
+                print()
 
-    A = np.array([[1, 0, 1],
-                  [0, 0.5, 1],
-                  [1, 1, 1]])
-    # A = scipy.linalg.hilbert(n=20)
-    b = np.array([3, 1, 2]).T
-    # b = np.ones(20).T
-    ax_b = func.MultivariateLinear(A=A, b=b)
-    cg_linear = alg.ConjugateGradient(ax_b)
-    cg_linear.execute()
-
-    for n in [5]:
+    print("*"*50)
+    # Linear CG task
+    for n in [5, 8, 12, 20, 30]:
         print('*' * 25)
         print(f"HILBERT MATRIX {n} x {n}")
         print('*' * 25)
         A = scipy.linalg.hilbert(n=n)
+        x_star = np.linalg.solve(A, np.ones(n))
+
         hilbert_quadratic = func.Quadratic(A=A, b=np.ones(n))
         sd_hilbert = alg.NewtonFamilyMethod(hilbert_quadratic,
                                             name='SD',
-                                            max_iterations=10**6)
-
-        x_star = np.linalg.solve(A, np.ones(n))
+                                            max_iterations=10 ** 5)
         sd_hilbert.execute()
 
         norm_of_difference = scipy.linalg.norm(sd_hilbert.x_k - x_star, ord=2)
         print(f"Exact solution = {x_star}")
         print(f"Norm of the difference between exact and found solutions = {norm_of_difference},"
               f" between starting point and exact solution = {scipy.linalg.norm(x_star, ord=2)}")
-        print('**'*15)
+        print('**' * 15)
 
-    print("/" * 50)
-    print('Task 1 and 6, polynomial of degree 4')
-    print("f(x) = 0.25x^4  +(2/3)x^3 -0.5x^2 -2x -7")
-    print("f'(x) = (x+1)(x-1)(x+2) --> minimizers are x= -2 and 1")
-    poly1 = func.UnivariatePolynomial(degree=4, coeffs=np.array([0.25, float(2 / 3), -0.5, -2., -7]))
-    sd1 = alg.NewtonFamilyMethod(poly1, start_point=np.array([0.]), name='SD')
-    sd1.execute()
-    nm1 = alg.NewtonFamilyMethod(poly1, start_point=np.array([0.]), name='NM')
-    nm1.execute()
+        cg_linear = alg.LinearConjugateGradient(hilbert_quadratic,
+                                                name="CG_Linear")
+        cg_linear.execute()
+
+        norm_of_difference = scipy.linalg.norm(cg_linear.x_k - x_star, ord=2)
+        print(f"Exact solution = {x_star}")
+        print(f"Norm of the difference between exact and found solutions = {norm_of_difference},"
+              f" between starting point and exact solution = {scipy.linalg.norm(x_star, ord=2)}")
+        print('**' * 15)
+
+
 
