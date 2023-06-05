@@ -9,9 +9,8 @@ from optim_algos import LineSearch
 
 
 class NewtonFamily(LineSearch, ABC):
-    def __init__(self, f: func.Function, name: str, start_point: np.ndarray = None, norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
-                 c: float = 0.99):
+    def __init__(self, f: func.Function, name: str, start_point: np.ndarray, norm: Union[str, float], eps: float,
+                 max_iterations: int, initial_alpha: float, rho: float, c: float):
         super().__init__(f, name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
     def compute_p_k(self):
@@ -36,6 +35,11 @@ class NewtonFamily(LineSearch, ABC):
 
 
 class NewtonMethod(NewtonFamily):
+    def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
+                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
+                 c: float = 0.99):
+        super().__init__(f, "Newton Method", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+
     def compute_b(self):
         if np.allclose(self.f.num_hessian(self.x_k), np.zeros(shape=self.f.get_dim())):
             if np.allclose(self.f.hessian(self.x_k), np.zeros(shape=self.f.get_dim())):
@@ -58,17 +62,12 @@ class NewtonMethod(NewtonFamily):
                 B_k = np.diag(np.ones(shape=self.f.get_dim()))
         return B_k
 
-    def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
-                 c: float = 0.99):
-        super().__init__(f, "Newton Method", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
-
 
 class SteepestDescent(NewtonFamily):
-    def compute_b(self):
-        return np.diag(np.ones(shape=self.f.get_dim()))
-
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
                  eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
                  c: float = 0.99):
         super().__init__(f, "Steepest Descent", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+
+    def compute_b(self):
+        return np.diag(np.ones(shape=self.f.get_dim()))
