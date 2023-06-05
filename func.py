@@ -162,3 +162,29 @@ class MultivariateLinear(Function):
 
     def hessian(self, x: np.ndarray) -> np.ndarray:
         return np.zeros(shape=(len(self.A), len(self.A)))
+
+
+class RosenBrock(Function):
+    def evaluate(self, x: np.ndarray) -> np.ndarray:
+        return 100 * ((x[1] - x[0] ** 2) ** 2) + (1 - x[0]) ** 2
+
+    def grad(self, x: np.ndarray) -> np.ndarray:
+        return np.array([400 * x[0] * (x[0] ** 2 - x[1]) - 2 * (-x[0] + 1),
+                         200 * (-x[0] ** 2 + x[1])])
+
+    def hessian(self, x: np.ndarray) -> np.ndarray:
+        return np.array([[800 * x[0] ** 2 - 400 * (-x[0] ** 2 + x[1]) + 2, -400 * x[0]],
+                         [-400 * x[0], 200]])
+
+
+class SecondObjective(Function):
+    def evaluate(self, x: np.ndarray) -> np.ndarray:
+        return 150 * (x[0] * x[1]) ** 2 + (0.5 * x[0] + 2 * x[1] - 2) ** 2
+
+    def grad(self, x: np.ndarray) -> np.ndarray:
+        return np.array([300 * x[0] * x[1] ** 2 + 0.5 * x[0] + 2 * x[1] - 2,
+                         300 * x[0] ** 2 * x[1] + 8 * (0.25 * x[0] + x[1] - 1)])
+
+    def hessian(self, x: np.ndarray) -> np.ndarray:
+        return np.array([[300 * x[1] ** 2 + 0.5, 600 * x[0] * x[1] + 2],
+                         [600 * x[0] * x[1] + 2, 300 * x[0] ** 2 + 8]])
