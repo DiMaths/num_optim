@@ -80,9 +80,10 @@ class LineSearch(ABC):
     def residual_norm(self):
         return np.linalg.norm(self.grad_f_k, ord=self.norm)
 
-class ConjugateGradient(LineSearch):
+
+class LinearConjugateGradient(LineSearch):
     def __init__(self, f: func.Function,
-                 name: str = 'Linear',
+                 name: str = 'CG_Linear',
                  start_point: np.ndarray = None,
                  norm: Union[str, float] = 2,
                  eps: float = 10**-6,
@@ -90,17 +91,11 @@ class ConjugateGradient(LineSearch):
                  initial_alpha: float = 1,
                  rho: float = 0.99,
                  c: float = 0.99):
-        # 'Linear', 'P-R', 'F-R'
 
-        if name not in ['Linear', 'P-R', 'F-R']:
-            raise ValueError("Possible names for NewtonFamilyMethod are: 'Linear', 'P-R', 'F-R'")
-        super().__init__(f, 'CG_' + name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
-        self.r_k = np.dot(self.f.A, self.x_k) - self.f.b
+        super().__init__(f, name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+        self.r_k = self.f.A @ self.x_k - self.f.b
         self.p_k = -self.r_k
         self.r_k_norm = None
-
-    def compute_alpha_k(self) -> float:
-        raise NotImplementedError("We don't use compute alpha for cg so far")
 
     def update(self):
         self.r_k_norm = np.dot(self.r_k.T, self.r_k)
@@ -119,4 +114,32 @@ class ConjugateGradient(LineSearch):
         return np.linalg.norm(self.r_k, ord=2)
 
 
+class NonlinearConjugateGradient(LineSearch):
+    def __init__(self, f: func.Function,
+                 name: str = 'CG_FR',
+                 start_point: np.ndarray = None,
+                 norm: Union[str, float] = 2,
+                 eps: float = 10 ** -6,
+                 max_iterations: int = 10 ** 6,
+                 initial_alpha: float = 1,
+                 rho: float = 0.99,
+                 c: float = 0.5):
+        super().__init__(f, name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+        self.grad_f_k_next = None
+        self.p_k = -self.grad_f_k
+
+    def update(self):
+        self.alpha_k = self.compute_alpha_k()
+        self.x_k += self.alpha_k * self.p_k
+        self.grad_f_k_next = self.f.grad(self.x_k)
+        beta_k_next = self.compute_beta_next()
+        self.p_k = -self.grad_f_k_next + beta_k_next * self.p_k
+        self.grad_f_k = self.grad_f_k_next
+        super().update()
+
+    def compute_beta_next(self):
+        if self.name == 'CG_PR':
+            return (self.grad_f_k_next.T @ (self.grad_f_k_next - self.grad_f_k)) / (self.grad_f_k.T @ self.grad_f_k)
+        elif self.name == 'CG_FR':
+            return (self.grad_f_k_next.T @ self.grad_f_k_next) / (self.grad_f_k.T @ self.grad_f_k)
 
