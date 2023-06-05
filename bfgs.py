@@ -14,11 +14,11 @@ class Bfgs(LineSearch):
     def bfgs_approx(self):
         x_k = self.x_k
         grad_f_k = self.f.grad(x_k)
-        p_k = -(self.H @ grad_f_k)  # search direction
+        self.p_k = -(self.H @ grad_f_k)  # search direction
 
-        alpha_k = LineSearch.compute_alpha_k(self)  # backtracking line search
+        alpha_k = LineSearch.compute_alpha_k(self)  # backtracking line
 
-        x_new = x_k + alpha_k * p_k
+        x_new = x_k + alpha_k * self.p_k
         s_k = x_new - x_k  # or: alpha_k * p_k
         grad_f_new = self.f.grad(x_new)
         y_k = grad_f_new - grad_f_k
@@ -32,5 +32,4 @@ class Bfgs(LineSearch):
         self.grad_f_k = grad_f_new
         self.H = H_new
         super().update()
-
 
