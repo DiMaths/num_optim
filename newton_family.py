@@ -41,26 +41,8 @@ class NewtonMethod(NewtonFamily):
         super().__init__(f, "Newton Method", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
     def compute_b(self):
-        if np.allclose(self.f.num_hessian(self.x_k), np.zeros(shape=self.f.get_dim())):
-            if np.allclose(self.f.hessian(self.x_k), np.zeros(shape=self.f.get_dim())):
-                print("DROPPED TO SD")
-                B_k = np.diag(np.ones(shape=self.f.get_dim()))
-            else:
-                print("NUM ISSUES WITH HESSIAN")
-                if self.f.get_dim() > 1:
-                    B_k = np.linalg.inv(self.f.hessian(self.x_k))
-                else:
-                    B_k = np.array([1 / self.f.hessian(self.x_k)])
-        else:
-            try:
-                if self.f.get_dim() > 1:
-                    B_k = np.linalg.inv(self.f.num_hessian(self.x_k))
-                else:
-                    B_k = np.array([1 / self.f.num_hessian(self.x_k)])
-            except LinAlgError:
-                print("DROPPED TO SD")
-                B_k = np.diag(np.ones(shape=self.f.get_dim()))
-        return B_k
+        # potentially might cause linalg error if hessian = 0 (either scalar or 0-matrix)
+        return np.linalg.inv(self.f.hessian(self.x_k))
 
 
 class SteepestDescent(NewtonFamily):
