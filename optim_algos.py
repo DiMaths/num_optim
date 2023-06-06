@@ -20,7 +20,7 @@ class LineSearch(ABC):
         self.name = name
         self.f = f
         if start_point is not None:
-            self.x_k = start_point
+            self.x_k = start_point.copy()
         else:
             self.x_k = np.zeros(shape=f.get_dim())
 

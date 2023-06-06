@@ -22,7 +22,7 @@ if __name__ == '__main__':
         for point in points[i]:
             print(f'***** STARTING POINT = {point} *****')
             for name in names:
-                test_alg = cg.NonlinearConjugateGradient(f, name, point.copy())
+                test_alg = cg.NonlinearConjugateGradient(f, name, point)
                 test_alg.execute()
                 print()
 
