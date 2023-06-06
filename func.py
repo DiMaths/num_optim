@@ -4,12 +4,16 @@ import numpy as np
 
 
 class Function(ABC):
-    def __init__(self, dim: int):
+    def __init__(self, dim: int, num_mode: bool = True, eps: float = 10 ** -6):
         """
         Base class for generalized function definitions
         :param dim: dimensions of function
+        :param num_mode: True to use numerical approximations of gradients and hessian
+        :param eps: deviation from point used to approximate grad, for hessian there's an extra multiplier
         """
         self.dim = dim
+        self.num_mode = num_mode
+        self.eps = eps
 
     @abstractmethod
     def evaluate(self, x: np.ndarray) -> np.ndarray:
@@ -20,8 +24,21 @@ class Function(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def grad(self, x: np.ndarray) -> np.ndarray:
+        if self.num_mode:
+            return self.num_grad(x, self.eps)
+        else:
+            return self.explicit_grad(x)
+
+    def hessian(self, x: np.ndarray) -> np.ndarray:
+        if self.num_mode:
+            # added 0.01 multiplier to increase accuracy (trying to counter the error from numerical grad)
+            return self.num_hessian(x, 0.01 * self.eps)
+        else:
+            return self.explicit_hessian(x)
+
+    @abstractmethod
+    def explicit_grad(self, x: np.ndarray) -> np.ndarray:
         """
         explicit gradient, differs for each subclass
         :param x: n-dimensional point x
@@ -30,7 +47,7 @@ class Function(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def hessian(self, x: np.ndarray) -> np.ndarray:
+    def explicit_hessian(self, x: np.ndarray) -> np.ndarray:
         """
         explicit hessian, differs for each subclass
         :param x: n-dimensional point x
@@ -91,10 +108,10 @@ class Quadratic(Function):
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         return 0.5 * x.T @ self.A @ x - self.b.T @ x
 
-    def grad(self, x: np.ndarray) -> np.ndarray:
+    def explicit_grad(self, x: np.ndarray) -> np.ndarray:
         return self.A @ x - self.b
 
-    def hessian(self, x: np.ndarray) -> np.ndarray:
+    def explicit_hessian(self, x: np.ndarray) -> np.ndarray:
         return self.A
 
 
@@ -105,10 +122,10 @@ class Sin(Function):
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         return np.sin(x)
 
-    def grad(self, x: np.ndarray) -> np.ndarray:
+    def explicit_grad(self, x: np.ndarray) -> np.ndarray:
         return np.cos(x)
 
-    def hessian(self, x: np.ndarray) -> np.ndarray:
+    def explicit_hessian(self, x: np.ndarray) -> np.ndarray:
         return -np.sin(x)
 
 
@@ -133,11 +150,11 @@ class UnivariatePolynomial(Function):
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         return self.coeffs @ np.vander(x, self.degree+1).T
 
-    def grad(self, x: np.ndarray) -> np.ndarray:
+    def explicit_grad(self, x: np.ndarray) -> np.ndarray:
         grad_coeffs = np.array([(self.degree - i)*self.coeffs[i] for i in range(len(self.coeffs)-1)])
         return grad_coeffs @ np.vander(x, self.degree).T
 
-    def hessian(self, x: np.ndarray) -> np.ndarray:
+    def explicit_hessian(self, x: np.ndarray) -> np.ndarray:
         hessian_coeffs = np.array([(self.degree - i) * (self.degree - i - 1) * self.coeffs[i] for i in range(len(self.coeffs) - 2)])
 
         return hessian_coeffs @ np.vander(x, self.degree-1).T
@@ -157,10 +174,10 @@ class MultivariateLinear(Function):
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         return self.A @ x - self.b
 
-    def grad(self, x: np.ndarray) -> np.ndarray:
+    def explicit_grad(self, x: np.ndarray) -> np.ndarray:
         return self.A.T
 
-    def hessian(self, x: np.ndarray) -> np.ndarray:
+    def explicit_hessian(self, x: np.ndarray) -> np.ndarray:
         return np.zeros(shape=(len(self.A), len(self.A)))
 
 
@@ -168,11 +185,11 @@ class RosenBrock(Function):
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         return 100 * ((x[1] - x[0] ** 2) ** 2) + (1 - x[0]) ** 2
 
-    def grad(self, x: np.ndarray) -> np.ndarray:
+    def explicit_grad(self, x: np.ndarray) -> np.ndarray:
         return np.array([400 * x[0] * (x[0] ** 2 - x[1]) - 2 * (-x[0] + 1),
                          200 * (-x[0] ** 2 + x[1])])
 
-    def hessian(self, x: np.ndarray) -> np.ndarray:
+    def explicit_hessian(self, x: np.ndarray) -> np.ndarray:
         return np.array([[800 * x[0] ** 2 - 400 * (-x[0] ** 2 + x[1]) + 2, -400 * x[0]],
                          [-400 * x[0], 200]])
 
@@ -181,10 +198,10 @@ class SecondObjective(Function):
     def evaluate(self, x: np.ndarray) -> np.ndarray:
         return 150 * (x[0] * x[1]) ** 2 + (0.5 * x[0] + 2 * x[1] - 2) ** 2
 
-    def grad(self, x: np.ndarray) -> np.ndarray:
+    def explicit_grad(self, x: np.ndarray) -> np.ndarray:
         return np.array([300 * x[0] * x[1] ** 2 + 0.5 * x[0] + 2 * x[1] - 2,
                          300 * x[0] ** 2 * x[1] + 8 * (0.25 * x[0] + x[1] - 1)])
 
-    def hessian(self, x: np.ndarray) -> np.ndarray:
+    def explicit_hessian(self, x: np.ndarray) -> np.ndarray:
         return np.array([[300 * x[1] ** 2 + 0.5, 600 * x[0] * x[1] + 2],
                          [600 * x[0] * x[1] + 2, 300 * x[0] ** 2 + 8]])
