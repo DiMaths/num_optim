@@ -6,6 +6,46 @@ import conjugate_gradient as cg
 import newton_family
 
 if __name__ == '__main__':
+    # Common Newton
+
+    print('#' * 50)
+    print('\tStandard NM usage case')
+    print('#' * 50)
+    points = [[np.array([1.2, 1.2]), np.array([-1.2, 1.]), np.array([0.2, 0.8])],
+               [np.array([-0.2, 1.2]), np.array([3.8, 0.1]), np.array([1.9, 0.6])]]
+    funcs = [[func.RosenBrock(2),"Rosenblock"], [func.SecondObjective(2),"Alternative"]]
+    for i,f in enumerate(funcs):
+        print("\n")
+        print('|' * 50)
+        print(f'Experiments on "{f[1]}" function')
+        print('|' * 50)
+        for point in points[i]:
+            print(f'***** STARTING POINT = {point} *****')
+            test_nm = newton_family.NewtonMethod(f[0], point)
+            result = test_nm.execute()
+            print(result)
+
+    # Newton with modifications
+
+    print('#' * 50)
+    print('\tNM with modifications case')
+    print('#' * 50)
+    points = [[np.array([1.2, 1.2]), np.array([-1.2, 1.]), np.array([0.2, 0.8])],
+               [np.array([-0.2, 1.2]), np.array([3.8, 0.1]), np.array([1.9, 0.6])]]
+    funcs = [[func.RosenBrock(2),"Rosenblock"], [func.SecondObjective(2),"Alternative"]]
+    for i,f in enumerate(funcs):
+        print("\n")
+        print('|' * 50)
+        print(f'Experiments on "{f[1]}" function')
+        print('|' * 50)
+        for point in points[i]:
+            print(f'***** STARTING POINT = {point} *****')
+            test_nm = newton_family.NewtonMethodModificated(f[0], point)
+            result = test_nm.execute()
+            print(result)
+    print('#' * 50)
+
+
     # Nonlinear CG both F-R and P-R
 
     fs = [func.RosenBrock(2), func.SecondObjective(2)]
