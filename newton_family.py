@@ -46,13 +46,14 @@ class NewtonMethod(NewtonFamily):
         return np.linalg.inv(self.f.hessian(self.x_k))
 
 
-class NewtonMethodModificated(NewtonFamily):
+class NewtonMethodModified(NewtonFamily):
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
                  eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
                  c: float = 0.99):
-        super().__init__(f, "Newton Method", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+        super().__init__(f, "Newton Method Cholesky Modification",
+                         start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
-    def cholesky_(self, hess, beta=0.001, K = 10**3):
+    def cholesky_(self, hess, beta=0.001, K=10**3):
         if min(np.diag(hess)) > 0:
             t0 = 0
         else:
@@ -66,16 +67,11 @@ class NewtonMethodModificated(NewtonFamily):
         return hess
 
     def compute_b(self):
-        try: 
-            eigs = np.linalg.eigvals(self.f.hessian(self.x_k))
-            if min(eigs) > 0:
-                inverse = np.linalg.inv(self.f.hessian(self.x_k))
-            else:
-               inverse = np.linalg.inv(self.cholesky_(self.f.hessian(self.x_k)))
-            
-            return inverse
-        except:
-            raise LinAlgError("An error occurred, most probably due to the absence of a inverse of a hessian")
+        eigs = np.linalg.eigvals(self.f.hessian(self.x_k))
+        if min(eigs) > 0:
+            return np.linalg.inv(self.f.hessian(self.x_k))
+        else:
+           return np.linalg.inv(self.cholesky_(self.f.hessian(self.x_k)))
 
 
 class SteepestDescent(NewtonFamily):
