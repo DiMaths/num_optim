@@ -17,6 +17,17 @@ class LineSearch(ABC):
                  initial_alpha: float = 1,
                  rho: float = 0.99,
                  c: float = 0.99):
+        """
+        :param f: func.Function, function to perform line search on
+        :param name: str, name of the algo
+        :param start_point: np.ndarray, starting point = the 0th iterate = x_0
+        :param norm: Union[str, float] to use as ord param in np.norm()
+        :param eps: float, stopping threshold for residual's norm
+        :param max_iterations: int, upper bound on k
+        :param initial_alpha: float, initial alpha to check Wolfe Conditions
+        :param rho: float in (0, 1) - multiplier for updating alpha
+        :param c: float in (0, 1) - constant for Wolfe Conditions
+        """
         self.name = name
         self.f = f
         if start_point is not None:
