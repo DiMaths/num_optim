@@ -15,7 +15,7 @@ class NewtonFamily(LineSearch, ABC):
         super().__init__(f, name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
     def compute_p_k(self):
-        return - self.compute_b() @ self.grad_f_k
+        return np.linalg.solve(self.compute_b(), -self.grad_f_k)
 
     def update(self):
         if self.iterations == 0 or self.alpha_k == 1 or (self.grad_f_k != self.f.grad(self.x_k)).any():
@@ -23,9 +23,8 @@ class NewtonFamily(LineSearch, ABC):
             # it could happen that the optimal step size is more than -1*grad, but than alpha should be 1
             self.grad_f_k = self.f.grad(self.x_k)
             self.p_k = self.compute_p_k()
-            self.alpha_k = self.compute_alpha_k()
-
-            self.x_k += self.alpha_k * self.p_k
+            self.alpha_k = self.compute_alpha_k() 
+            self.x_k += self.alpha_k * self.p_k  
             super().update()
         else:
             self.stuck = True
@@ -43,7 +42,7 @@ class NewtonMethod(NewtonFamily):
 
     def compute_b(self):
         # potentially might cause linalg error if hessian = 0 (either scalar or 0-matrix)
-        return np.linalg.inv(self.f.hessian(self.x_k))
+        return self.f.hessian(self.x_k)
 
 
 class NewtonMethodModified(NewtonFamily):
@@ -53,7 +52,7 @@ class NewtonMethodModified(NewtonFamily):
         super().__init__(f, "Newton Method Cholesky Modification",
                          start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
-    def cholesky_(self, hess, beta=0.001, K=10**3):
+    def cholesky_(self, hess, beta=0.001, K = 10**3):
         if min(np.diag(hess)) > 0:
             t0 = 0
         else:
@@ -67,11 +66,11 @@ class NewtonMethodModified(NewtonFamily):
         return hess
 
     def compute_b(self):
-        eigs = np.linalg.eigvals(self.f.hessian(self.x_k))
+        eigs = np.linalg.eigvals(self.f.hessian(self.x_k))      
         if min(eigs) > 0:
-            return np.linalg.inv(self.f.hessian(self.x_k))
+            return self.f.hessian(self.x_k)
         else:
-           return np.linalg.inv(self.cholesky_(self.f.hessian(self.x_k)))
+            return self.cholesky_(self.f.hessian(self.x_k))
 
 
 class SteepestDescent(NewtonFamily):

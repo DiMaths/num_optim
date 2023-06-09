@@ -31,10 +31,10 @@ if __name__ == '__main__':
         print('|' * 50)
         for point in points[i]:
             print(f'***** STARTING POINT = {point} *****')
-            test_alg = newton_family.NewtonMethod(f, point)
+            test_alg = newton_family.NewtonMethod(f, point, c=0, rho=0.9)
             test_alg.execute()
             print()
-            test_alg = newton_family.NewtonMethodModified(f, point)
+            test_alg = newton_family.NewtonMethodModified(f, point, c=0, rho=0.9)
             test_alg.execute()
             print()
 
