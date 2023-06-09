@@ -7,12 +7,19 @@ import newton_family
 
 if __name__ == '__main__':
 
-    fs = [func.RosenBrock(2), func.SecondObjective(2)]
-    fs_names = ["Rosenblock", "Alternative"]
+    fs = [func.RosenBrock(dim=2, num_mode=True),
+          func.RosenBrock(dim=2, num_mode=False),
+          func.SecondObjective(dim=2, num_mode=True),
+          func.SecondObjective(dim=2, num_mode=False)]
+    fs_names = ["Rosenblock: approximated",
+                "Rosenblock: exact mode",
+                "Alternative: approximated",
+                "Alternative: exact mode"]
     points = [[np.array([1.2, 1.2]), np.array([-1.2, 1.]), np.array([0.2, 0.8])],
+              [np.array([1.2, 1.2]), np.array([-1.2, 1.]), np.array([0.2, 0.8])],
+              [np.array([-0.2, 1.2]), np.array([3.8, 0.1]), np.array([1.9, 0.6])],
               [np.array([-0.2, 1.2]), np.array([3.8, 0.1]), np.array([1.9, 0.6])]]
 
-    #
     print("#" * 50)
     print("Newton task: Standard vs Cholesky Modification")
     print("#" * 50)
@@ -49,7 +56,7 @@ if __name__ == '__main__':
                 test_alg.execute()
                 print()
 
-    print("#"*50)
+    print("#"* 50)
     print("Linear CG task")
     print("#" * 50)
 
@@ -61,7 +68,7 @@ if __name__ == '__main__':
         x_star = np.linalg.solve(A, np.ones(n))
 
         hilbert_quadratic = func.Quadratic(A=A, b=np.ones(n))
-        sd_hilbert = newton_family.SteepestDescent(hilbert_quadratic, max_iterations=10 ** 5)
+        sd_hilbert = newton_family.SteepestDescent(hilbert_quadratic, max_iterations=10 ** 4)
         sd_hilbert.execute()
 
         norm_of_difference = scipy.linalg.norm(sd_hilbert.x_k - x_star, ord=2)
