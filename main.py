@@ -6,13 +6,16 @@ import conjugate_gradient as cg
 import newton_family
 
 if __name__ == '__main__':
-    # Nonlinear CG both F-R and P-R
 
     fs = [func.RosenBrock(2), func.SecondObjective(2)]
     fs_names = ["Rosenblock", "Alternative"]
     points = [[np.array([1.2, 1.2]), np.array([-1.2, 1.]), np.array([0.2, 0.8])],
               [np.array([-0.2, 1.2]), np.array([3.8, 0.1]), np.array([1.9, 0.6])]]
-    names = ["FR", "PR"]
+
+    #
+    print("#" * 50)
+    print("Newton task: Standard vs Cholesky Modification")
+    print("#" * 50)
 
     for i, f in enumerate(fs):
         print()
@@ -21,13 +24,35 @@ if __name__ == '__main__':
         print('|' * 50)
         for point in points[i]:
             print(f'***** STARTING POINT = {point} *****')
-            for name in names:
+            test_alg = newton_family.NewtonMethod(f, point)
+            test_alg.execute()
+            print()
+            test_alg = newton_family.NewtonMethodModified(f, point)
+            test_alg.execute()
+            print()
+
+    print("#" * 50)
+    print("Nonlinear CG task: both F-R and P-R ")
+    print("#" * 50)
+
+    cg_names = ["FR", "PR"]
+
+    for i, f in enumerate(fs):
+        print()
+        print('|' * 50)
+        print(f'Experiments on "{fs_names[i]}" function')
+        print('|' * 50)
+        for point in points[i]:
+            print(f'***** STARTING POINT = {point} *****')
+            for name in cg_names:
                 test_alg = cg.NonlinearConjugateGradient(f, name, point)
                 test_alg.execute()
                 print()
 
-    print("*"*50)
-    # Linear CG task
+    print("#"*50)
+    print("Linear CG task")
+    print("#" * 50)
+
     for n in [5, 8, 12, 20, 30]:
         print('*' * 25)
         print(f"HILBERT MATRIX {n} x {n}")
