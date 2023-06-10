@@ -37,11 +37,11 @@ class QuasiNewtonMethod(NewtonFamily, ABC):
         raise NotImplementedError
 
 
-class Sr1(QuasiNewtonMethod):
+class SR1(QuasiNewtonMethod):
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
+                 eps: float = 1e-6, max_iterations: int = 1e6, initial_alpha: float = 1, rho: float = 0.99,
                  c: float = 0.99):
-        super().__init__(f, "Sr1", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+        super().__init__(f, "SR1", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
     def approx_inverse_hessian(self, y_k, s_k):
         if np.abs(np.dot(y_k, s_k)) >= self.eps * np.linalg.norm(y_k) * np.linalg.norm(s_k):
@@ -53,7 +53,7 @@ class Sr1(QuasiNewtonMethod):
 
 class BFGS(QuasiNewtonMethod):
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
+                 eps: float = 1e-6, max_iterations: int = 1e6, initial_alpha: float = 1, rho: float = 0.99,
                  c: float = 0.99):
         super().__init__(f, "BFGS", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 

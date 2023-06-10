@@ -12,8 +12,8 @@ class LineSearch(ABC):
                  name: str,
                  start_point: np.ndarray = None,
                  norm: Union[str, float] = 2,
-                 eps: float = 10**-6,
-                 max_iterations: int = 10 ** 6,
+                 eps: float = 1e-6,
+                 max_iterations: int = 1e6,
                  initial_alpha: float = 1,
                  rho: float = 0.99,
                  c: float = 0.99):
@@ -70,9 +70,7 @@ class LineSearch(ABC):
     @abstractmethod
     def update(self):
         self.iterations += 1
-        # optional printing for seeing the process
         if self.iterations % 10**(np.floor(np.log10(self.iterations))) == 0:
-            # if (self.iterations < 100_000 and self.iterations % 10_000 == 0) or self.iterations % 100_000 == 0:
             print(f"{self.iterations} iterations, residual's norm = {self.residual_norm()}")
 
     def execute(self):

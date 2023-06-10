@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Function(ABC):
-    def __init__(self, dim: int, num_mode: bool = True, eps: float = 10 ** -6):
+    def __init__(self, dim: int, num_mode: bool = True, eps: float = 1e-6):
         """
         Base class for generalized function definitions
         :param dim: dimensions of function
@@ -55,7 +55,7 @@ class Function(ABC):
         """
         raise NotImplementedError
 
-    def num_grad(self, x: np.ndarray, eps: float = 10**-6) -> np.ndarray:
+    def num_grad(self, x: np.ndarray, eps: float = 1e-6) -> np.ndarray:
         """
         calculate numerical gradient aprox. at point
         :param x: n-dimensional point x
@@ -73,7 +73,7 @@ class Function(ABC):
                 grad.append(temp_partial)
         return np.array(grad)
 
-    def num_hessian(self, x: np.ndarray, eps: float = 10**-8) -> np.ndarray:
+    def num_hessian(self, x: np.ndarray, eps: float = 1e-8) -> np.ndarray:
         """
         calculate numerical hessian approx. at point
         :param x: n-dimensional point x

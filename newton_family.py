@@ -23,8 +23,8 @@ class NewtonFamily(LineSearch, ABC):
             # it could happen that the optimal step size is more than -1*grad, but than alpha should be 1
             self.grad_f_k = self.f.grad(self.x_k)
             self.p_k = self.compute_p_k()
-            self.alpha_k = self.compute_alpha_k() 
-            self.x_k += self.alpha_k * self.p_k  
+            self.alpha_k = self.compute_alpha_k()
+            self.x_k += self.alpha_k * self.p_k
             super().update()
         else:
             self.stuck = True
@@ -36,9 +36,9 @@ class NewtonFamily(LineSearch, ABC):
 
 class NewtonMethod(NewtonFamily):
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
+                 eps: float = 1e-6, max_iterations: int = 1e6, initial_alpha: float = 1, rho: float = 0.99,
                  c: float = 0.99):
-        super().__init__(f, "Newton Method", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+        super().__init__(f, "NM", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
     def compute_b(self):
         # potentially might cause linalg error if hessian = 0 (either scalar or 0-matrix)
@@ -47,12 +47,12 @@ class NewtonMethod(NewtonFamily):
 
 class NewtonMethodModified(NewtonFamily):
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
+                 eps: float = 1e-6, max_iterations: int = 1e6, initial_alpha: float = 1, rho: float = 0.99,
                  c: float = 0.99):
-        super().__init__(f, "Newton Method Cholesky Modification",
+        super().__init__(f, "NM_Cholesky",
                          start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
-    def cholesky_(self, hess, beta=0.001, K = 10**3):
+    def cholesky_(self, hess, beta=1e-3, K=1_000):
         if min(np.diag(hess)) > 0:
             t0 = 0
         else:
@@ -75,7 +75,7 @@ class NewtonMethodModified(NewtonFamily):
 
 class SteepestDescent(NewtonFamily):
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
+                 eps: float = 1e-6, max_iterations: int = 1e6, initial_alpha: float = 1, rho: float = 0.99,
                  c: float = 0.99):
         super().__init__(f, "Steepest Descent", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
