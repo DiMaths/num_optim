@@ -11,14 +11,14 @@ class QuasiNewtonMethod(NewtonFamily, ABC):
     def __init__(self, f: func.Function, name: str, start_point: np.ndarray, norm: Union[str, float], eps: float,
                  max_iterations: int, initial_alpha: float, rho: float, c: float):
         super().__init__(f, name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
-        self.H = np.eye(self.f.get_dim())  # inital approx. of inverse Hessian - added ???
+        self.H = np.eye(self.f.get_dim())
 
     def compute_b(self):
         x_k = self.x_k
         grad_f_k = self.f.grad(x_k)
         self.p_k = -self.H @ grad_f_k  # search direction (6.18)
 
-        alpha_k = self.compute_alpha_k()  # backtracking line search # same for SR1 ?
+        alpha_k = self.compute_alpha_k()
 
         x_new = x_k + alpha_k * self.p_k  # (6.3)
         # define s_k and y_k (6.5)
@@ -46,9 +46,9 @@ class SR1(QuasiNewtonMethod):
     def approx_inverse_hessian(self, y_k, s_k):
         if np.abs(np.dot(y_k, s_k)) >= self.eps * np.linalg.norm(y_k) * np.linalg.norm(s_k):
             Hy = np.dot(self.H, y_k)
-            return self.H + np.outer(s_k - Hy, s_k - Hy) / np.dot(y_k, s_k - Hy)
-        else:
-            return self.H
+            if np.dot(y_k, s_k - Hy) != 0:
+                return self.H + np.outer(s_k - Hy, s_k - Hy) / np.dot(y_k, s_k - Hy)
+        return self.H
 
 
 class BFGS(QuasiNewtonMethod):

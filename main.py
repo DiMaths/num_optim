@@ -20,13 +20,17 @@ def create_alg(name: str, **kwargs):
         return newton_family.NewtonMethod(**kwargs)
     elif name == "NM_Cholesky":
         return newton_family.NewtonMethodModified(**kwargs)
+    elif name == "SD":
+        return newton_family.SteepestDescent(**kwargs)
 
 
-def print_distance_to_solution(x_found, solutions, norm, allowed_difference: float = 0.1):
-    difference = np.min([np.linalg.norm(x_sol - x_found, ord=norm) for x_sol in solutions])
+def print_distance_to_solution(x_found, solutions, norm):
+    diffs = [np.linalg.norm(x_sol - x_found, ord=norm) for x_sol in solutions]
+    closest_solution_index = np.argmin(diffs)
+    difference = diffs[closest_solution_index]
+    closest_solution = solutions[closest_solution_index]
+    print(f"Closest exact solution is x_star = {closest_solution}")
     print(f"Distance(norm) from final iterate to the closest exact solution = {difference}")
-    if difference > allowed_difference:
-        print(f"SOLUTION IS NOT FOUND AT ALL")
 
 
 def run(fs, fs_names, start_points, solutions, algo_names, **kwargs):
@@ -62,43 +66,40 @@ if __name__ == '__main__':
                  [np.array([0., 1.]), np.array([4., 0.])],
                  [np.array([0., 1.]), np.array([4., 0.])]]
 
-    # run(fs, fs_names, start_points, solutions, ["SR1", "BFGS"], c=0., rho=0.975)
-
     print("#" * 50)
     print("Newton task: Standard vs Cholesky Modification")
     print("#" * 50)
 
-    run(fs, fs_names, start_points, solutions, ["NM", "NM_Cholesky"], c=0., rho=0.9)
+    # run(fs, fs_names, start_points, solutions, ["NM", "NM_Cholesky"], c=0., rho=0.9)
+
+    print("#" * 50)
+    print("Linear CG task")
+    print("#" * 50)
+    hilbert_fs = []
+    hilbert_solutions = []
+    hilbert_fs_names = []
+    hilbert_starts = []
+
+    for n in [5, 8, 12, 20, 30]:
+        A = scipy.linalg.hilbert(n=n)
+        b = np.ones(n, dtype=float)
+        x_star = np.linalg.solve(A, b)
+        hilbert_f = func.Quadratic(A=A, b=b)
+        hilbert_fs.append(hilbert_f)
+        hilbert_fs_names.append(f"HILBERT MATRIX {n} x {n}")
+        hilbert_solutions.append([x_star])
+        hilbert_starts.append([np.zeros(n, dtype=float)])
+
+    # run(hilbert_fs, hilbert_fs_names, hilbert_starts, hilbert_solutions, ["CG_Linear", "SD"], max_iterations=1e5)
 
     print("#" * 50)
     print("Nonlinear CG task: both F-R and P-R ")
     print("#" * 50)
 
-    run(fs, fs_names, start_points, solutions, ["CG_FR", "CG_PR"])
+    # run(fs, fs_names, start_points, solutions, ["CG_FR", "CG_PR"])
 
-    """print("#"* 50)
-        print("Linear CG task")
-        print("#" * 50)
+    print("#" * 50)
+    print("QN task: SR1 and BFGS")
+    print("#" * 50)
 
-        for n in [3, 4, 5, 6, 7, 8]:
-            print('*' * 25)
-            print(f"HILBERT MATRIX {n} x {n}")
-            print('*' * 25)
-            A = scipy.linalg.hilbert(n=n)
-            b = np.ones(n, dtype=float)
-            x_star = np.linalg.solve(A, b)
-
-            hilbert_quadratic = func.Quadratic(A=A, b=b)
-            sd_hilbert = newton_family.SteepestDescent(hilbert_quadratic, max_iterations=10 ** 4)
-            sd_hilbert.execute()
-
-            norm_of_difference = np.linalg.norm(sd_hilbert.x_k - x_star, ord=2)
-            print(f"Distance(norm) from final iterate to the closest exact solution = {norm_of_difference}")
-            print('**' * 15)
-
-            cg_linear = cg.LinearConjugateGradient(hilbert_quadratic)
-            cg_linear.execute()
-
-            norm_of_difference = np.linalg.norm(cg_linear.x_k - x_star, ord=2)
-            print(f"Distance(norm) from final iterate to the closest exact solution = {norm_of_difference}")
-            print('**' * 15)"""
+    # run(fs, fs_names, start_points, solutions, ["SR1", "BFGS"], c=0.5, rho=0.9)

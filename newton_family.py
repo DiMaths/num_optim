@@ -77,7 +77,7 @@ class SteepestDescent(NewtonFamily):
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
                  eps: float = 1e-6, max_iterations: int = 1e6, initial_alpha: float = 1, rho: float = 0.99,
                  c: float = 0.99):
-        super().__init__(f, "Steepest Descent", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+        super().__init__(f, "SD", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
     def compute_b(self):
         return np.diag(np.ones(shape=self.f.get_dim()))
