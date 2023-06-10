@@ -10,7 +10,7 @@ from newton_family import NewtonFamily
 class QuasiNewtonMethod(NewtonFamily, ABC):
 
     def compute_b(self):
-        self.c = 0.6  #  ok ??? at initialization
+        self.c = 0.6  #  at initialization
         x_k = self.x_k
         grad_f_k = self.f.grad(x_k)
         self.p_k = -self.H @ grad_f_k  # search direction (6.18)
@@ -59,7 +59,7 @@ class BFGS(QuasiNewtonMethod):
         import numpy.linalg as la
         I = np.eye(self.f.get_dim())
 
-        if y_k.T @ s_k > 0:# np.all(self.H.T * gfn > self.H.T * gf): http://www2.imm.dtu.dk/documents/ftp/publlec/lec2_99.pdf
+        if y_k.T @ s_k > 0:# http://www2.imm.dtu.dk/documents/ftp/publlec/lec2_99.pdf
             # (6.17) compute H_{k+1} -> H_new using BFGS formula
             rho_k = 1.0 / (y_k.T @ s_k)  # (6.14)
             return (I - rho_k * s_k @ y_k.T) @ self.H @ (I - rho_k * y_k @ s_k.T) + rho_k * s_k @ s_k.T #add inv
@@ -71,14 +71,14 @@ class BFGS(QuasiNewtonMethod):
                  c: float = 0.99):
         super().__init__(f, "BFGS", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
-class Sr1_tr(QuasiNewtonMethod):
+class Sr1_tr(NewtonFamily):
     def compute_s(self, grad_f_k, B_k, delta_k):
-        p_k = -np.linalg.solve(B_k, grad_f_k)
+        p_k = -np.linalg.inv(B_k) @ grad_f_k
         norm_p_k = np.linalg.norm(p_k)
         if norm_p_k <= delta_k:
             s = p_k
         else:
-            s = (delta_k / norm_p_k) * p_k  # if norm of p_k outside trust region radius, scale down p_k
+            s = (delta_k * p_k )/ norm_p_k  # if norm of p_k outside trust region radius, scale down p_k
         return s
 
     def compute_b(self):
@@ -86,12 +86,11 @@ class Sr1_tr(QuasiNewtonMethod):
         B_k = self.f.hessian(x_k)
         f_k = self.f.evaluate(x_k)
         grad_f_k = self.f.grad(x_k)
-        eta = 0.1 #1e-3
+        eta = 0.15# 1e-3
         delta_k = self.delta_k
 
         # compute s_k (6.27)
         # solve for s https://digital.library.unt.edu/ark:/67531/metadc283525/m2/1/high_res_d/metadc283525.pdf
-        # -np.linalg.inv(B_k) @ grad_f_k or use compute_s ????
         s_k = self.compute_s(grad_f_k, B_k, delta_k)
 
         y_k = self.f.grad(x_k + s_k) - grad_f_k
@@ -129,12 +128,8 @@ class Sr1_tr(QuasiNewtonMethod):
 
         return B_k
 
-    def approx_inverse_hessian(self, y_k, s_k):  #  ???
-        pass
-
     def __init__(self, f: func.Function, start_point: np.ndarray = None, norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
-                 c: float = 0.99):
-        super().__init__(f, "SR1-TR", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
-        self.delta_k: float = 1.0 # for trust region SR1 it's common practive to use 1.0 as initial trust-region radius
-
+                                   eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
+                                   c: float = 0.99):
+                          super().__init__(f, "SR1-TR", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+                          self.delta_k: float = 0.1 # for trust region SR1 use 0.1 as initial trust-region radius
