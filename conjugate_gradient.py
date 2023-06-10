@@ -10,8 +10,8 @@ class LinearConjugateGradient(LineSearch):
     def __init__(self, f: func.Function,
                  start_point: np.ndarray = None,
                  norm: Union[str, float] = 2,
-                 eps: float = 10**-6,
-                 max_iterations: int = 10 ** 6,
+                 eps: float = 1e-6,
+                 max_iterations: int = 1e6,
                  initial_alpha: float = 1,
                  rho: float = 0.99,
                  c: float = 0.99):
@@ -40,15 +40,15 @@ class LinearConjugateGradient(LineSearch):
 
 class NonlinearConjugateGradient(LineSearch):
     def __init__(self, f: func.Function,
-                 name: str = 'FR',
+                 name: str = 'CG_FR',
                  start_point: np.ndarray = None,
                  norm: Union[str, float] = 2,
-                 eps: float = 10 ** -6,
-                 max_iterations: int = 10 ** 6,
+                 eps: float = 1e-6,
+                 max_iterations: int = 1e6,
                  initial_alpha: float = 1,
                  rho: float = 0.99,
                  c: float = 0.5):
-        super().__init__(f, "CG_" + name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
+        super().__init__(f, name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
         self.grad_f_k_next = None
         self.p_k = -self.grad_f_k
 

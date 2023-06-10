@@ -12,11 +12,22 @@ class LineSearch(ABC):
                  name: str,
                  start_point: np.ndarray = None,
                  norm: Union[str, float] = 2,
-                 eps: float = 10**-6,
-                 max_iterations: int = 10 ** 6,
+                 eps: float = 1e-6,
+                 max_iterations: int = 1e6,
                  initial_alpha: float = 1,
                  rho: float = 0.99,
                  c: float = 0.99):
+        """
+        :param f: func.Function, function to perform line search on
+        :param name: str, name of the algo
+        :param start_point: np.ndarray, starting point = the 0th iterate = x_0
+        :param norm: Union[str, float] to use as ord param in np.norm()
+        :param eps: float, stopping threshold for residual's norm
+        :param max_iterations: int, upper bound on k
+        :param initial_alpha: float, initial alpha to check Wolfe Conditions
+        :param rho: float in (0, 1) - multiplier for updating alpha
+        :param c: float in (0, 1) - constant for Wolfe Conditions
+        """
         self.name = name
         self.f = f
         if start_point is not None:
@@ -54,15 +65,12 @@ class LineSearch(ABC):
         print(f"Execution took {self.iterations} iterations")
         print(f"Found solution is x = {self.x_k}")
         print(f"Final residual norm is {self.residual_norm()}")
-        print('-' * 50)
 
     @abstractmethod
     def update(self):
         self.iterations += 1
-        # optional printing for seeing the process
-        if self.iterations % 10**(np.floor(np.log10(self.iterations))) == 0:
-            # if (self.iterations < 100_000 and self.iterations % 10_000 == 0) or self.iterations % 100_000 == 0:
-            print(f"{self.iterations} iterations, residual's norm = {self.residual_norm()}")
+        """if self.iterations % 10**(np.floor(np.log10(self.iterations))) == 0:
+            print(f"{self.iterations} iterations, residual's norm = {self.residual_norm()}")"""
 
     def execute(self):
         print(f"Execute {self.name}")
