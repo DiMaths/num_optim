@@ -22,6 +22,8 @@ def create_alg(name: str, **kwargs):
         return newton_family.NewtonMethodModified(**kwargs)
     elif name == "SD":
         return newton_family.SteepestDescent(**kwargs)
+    elif name == "SR1_TR":
+        return quasi_newton_family.SR1_TR(**kwargs)
 
 
 def print_distance_to_solution(x_found, solutions, norm):
@@ -103,3 +105,9 @@ if __name__ == '__main__':
     print("#" * 50)
 
     # run(fs, fs_names, start_points, solutions, ["SR1", "BFGS"], c=0.5, rho=0.9)
+
+    print("#" * 50)
+    print("QN bonus task: SR1 Trust Region")
+    print("#" * 50)
+
+    run(fs, fs_names, start_points, solutions, ["SR1_TR"])

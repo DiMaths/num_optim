@@ -11,7 +11,7 @@ class QuasiNewtonMethod(NewtonFamily, ABC):
     def __init__(self, f: func.Function, name: str, start_point: np.ndarray, norm: Union[str, float], eps: float,
                  max_iterations: int, initial_alpha: float, rho: float, c: float):
         super().__init__(f, name, start_point, norm, eps, max_iterations, initial_alpha, rho, c)
-        self.H = np.eye(self.f.get_dim()) # inital approx. of inverse Hessian
+        self.H = np.eye(self.f.get_dim())  # initial approx. of inverse Hessian
 
     def compute_b(self):
         x_k = self.x_k
@@ -61,10 +61,9 @@ class BFGS(QuasiNewtonMethod):
         super().__init__(f, "BFGS", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
         
     def approx_inverse_hessian(self, y_k: np.array, s_k: np.array) -> np.array:
-        import numpy.linalg as la
         I = np.eye(self.f.get_dim())
 
-        if y_k.T @ s_k > 0:# http://www2.imm.dtu.dk/documents/ftp/publlec/lec2_99.pdf
+        if y_k.T @ s_k > 0:  # http://www2.imm.dtu.dk/documents/ftp/publlec/lec2_99.pdf
             # (6.17) compute H_{k+1} -> H_new using BFGS formula
             rho_k = 1.0 / (y_k.T @ s_k)  # (6.14)
             return (I - rho_k * s_k @ y_k.T) @ self.H @ (I - rho_k * y_k @ s_k.T) + rho_k * s_k @ s_k.T  # add inv
@@ -77,11 +76,11 @@ class SR1_TR(NewtonFamily):
                                    eps: float = 10 ** -6, max_iterations: int = 10 ** 6, initial_alpha: float = 1, rho: float = 0.99,
                                    c: float = 0.6):
         super().__init__(f, "SR1_TR", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
-        self.delta_k: float = 0.1 # for trust region SR1 use 0.1 as initial trust-region radius
+        self.delta_k: float = 0.1  # for trust region SR1 use 0.1 as initial trust-region radius
             
     def compute_s(self, grad_f_k, B_k, delta_k):
         # p_k = -np.linalg.inv(B_k) @ grad_f_k
-        p_k = np.linalg.solve(B_k, -grad_f_k) #does the same without compiting inv
+        p_k = np.linalg.solve(B_k, -grad_f_k)  # does the same without computing inv
         norm_p_k = np.linalg.norm(p_k)
         if norm_p_k <= delta_k:
             s = p_k
@@ -94,7 +93,7 @@ class SR1_TR(NewtonFamily):
         B_k = self.f.hessian(x_k)
         f_k = self.f.evaluate(x_k)
         grad_f_k = self.f.grad(x_k)
-        eta = 0.15# 1e-3
+        eta = 0.15  # 1e-3
         delta_k = self.delta_k
 
         # compute s_k (6.27)
