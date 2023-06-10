@@ -65,13 +65,12 @@ class LineSearch(ABC):
         print(f"Execution took {self.iterations} iterations")
         print(f"Found solution is x = {self.x_k}")
         print(f"Final residual norm is {self.residual_norm()}")
-        print('-' * 50)
 
     @abstractmethod
     def update(self):
         self.iterations += 1
-        if self.iterations % 10**(np.floor(np.log10(self.iterations))) == 0:
-            print(f"{self.iterations} iterations, residual's norm = {self.residual_norm()}")
+        """if self.iterations % 10**(np.floor(np.log10(self.iterations))) == 0:
+            print(f"{self.iterations} iterations, residual's norm = {self.residual_norm()}")"""
 
     def execute(self):
         print(f"Execute {self.name}")
