@@ -92,22 +92,23 @@ if __name__ == '__main__':
         hilbert_solutions.append([x_star])
         hilbert_starts.append([np.zeros(n, dtype=float)])
 
-    # run(hilbert_fs, hilbert_fs_names, hilbert_starts, hilbert_solutions, ["CG_Linear", "SD"], max_iterations=1e5)
+    run(hilbert_fs, hilbert_fs_names, hilbert_starts, hilbert_solutions, ["CG_Linear", "SD"], max_iterations=1e5)
 
     print("#" * 50)
     print("Nonlinear CG task: both F-R and P-R ")
     print("#" * 50)
 
-    # run(fs, fs_names, start_points, solutions, ["CG_FR", "CG_PR"])
+    run(fs, fs_names, start_points, solutions, ["CG_FR", "CG_PR"])
 
     print("#" * 50)
     print("QN task: SR1 and BFGS")
     print("#" * 50)
 
-    # run(fs, fs_names, start_points, solutions, ["SR1", "BFGS"], c=0.5, rho=0.9)
+    run(fs, fs_names, start_points, solutions, ["BFGS"], c=0.5, rho=0.9)
+    run(fs, fs_names, start_points, solutions, ["SR1"], c=0, rho=0.99)
 
     print("#" * 50)
     print("QN bonus task: SR1 Trust Region")
     print("#" * 50)
 
-    # run(fs, fs_names, start_points, solutions, ["SR1_TR"])
+    run(fs, fs_names, start_points, solutions, ["SR1_TR"])
