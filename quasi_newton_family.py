@@ -46,6 +46,14 @@ class SR1(QuasiNewtonMethod):
                  c: float = 0.6):
         super().__init__(f, "SR1", start_point, norm, eps, max_iterations, initial_alpha, rho, c)
 
+    
+    def update(self):
+        self.grad_f_k = self.f.grad(self.x_k)
+        self.p_k = self.compute_p_k()
+        self.alpha_k = self.compute_alpha_k()
+        self.x_k += self.alpha_k * self.p_k
+        self.iterations += 1
+
     def approx_inverse_hessian(self, y_k, s_k):
         if np.abs(np.dot(y_k, s_k)) >= self.eps * np.linalg.norm(y_k) * np.linalg.norm(s_k):
             Hy = np.dot(self.H, y_k)
@@ -87,6 +95,13 @@ class SR1_TR(NewtonFamily):
         else:
             s = (delta_k * p_k )/ norm_p_k  # if norm of p_k outside trust region radius, scale down p_k
         return s
+    
+    def update(self):
+        self.grad_f_k = self.f.grad(self.x_k)
+        self.p_k = self.compute_p_k()
+        self.alpha_k = self.compute_alpha_k()
+        self.x_k += self.alpha_k * self.p_k
+        self.iterations += 1
 
     def compute_b(self):
         x_k = self.x_k
