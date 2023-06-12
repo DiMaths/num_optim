@@ -55,8 +55,8 @@ if __name__ == '__main__':
           func.RosenBrock(dim=2, num_mode=False),
           func.SecondObjective(dim=2, num_mode=True),
           func.SecondObjective(dim=2, num_mode=False)]
-    fs_names = ["Rosenblock: approximated",
-                "Rosenblock: exact mode",
+    fs_names = ["RosenBrock: approximated",
+                "RosenBrock: exact mode",
                 "Alternative: approximated",
                 "Alternative: exact mode"]
     start_points = [[np.array([1.2, 1.2]), np.array([-1.2, 1.]), np.array([0.2, 0.8])],
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     print("Newton task: Standard vs Cholesky Modification")
     print("#" * 50)
 
-    # run(fs, fs_names, start_points, solutions, ["NM", "NM_Cholesky"], c=0., rho=0.9)
+    run(fs, fs_names, start_points, solutions, ["NM", "NM_Cholesky"], c=0.4, rho=0.5)
 
     print("#" * 50)
     print("Linear CG task")
@@ -110,4 +110,4 @@ if __name__ == '__main__':
     print("QN bonus task: SR1 Trust Region")
     print("#" * 50)
 
-    run(fs, fs_names, start_points, solutions, ["SR1_TR"])
+    # run(fs, fs_names, start_points, solutions, ["SR1_TR"])
